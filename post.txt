@@ -1,0 +1,21 @@
+original="linux-6.17.8"
+modified="linux-6.17.8-modified"
+output="cs140challengelab.patch"
+
+files="
+kernel/Makefile
+kernel/challengelab/Makefile
+kernel/challengelab/hello.c
+kernel/challengelab/getname.c
+kernel/challengelab/pcbcopylog.c
+arch/x86/entry/syscalls/syscall_64.tbl
+include/linux/syscalls.h
+kernel/fork.c
+"
+
+"$output"
+
+
+while IFS= read -r path; do
+  diff -uN "$original/$path" "$modified/$path" >> "$output"
+done <<< $(sed -e :a -e '/./,$!d;/^\n*$/{$d;N;};/\n$/ba' <(echo "$files"))
