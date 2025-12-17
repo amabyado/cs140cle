@@ -1,0 +1,78 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/syscall.h>
+#include <sys/wait.h>
+
+#define SYS_pcbcopylog 550 
+int
+main(void)
+{
+  // 1. Prints the PID of the process
+  printf("PID of Parent: %d\n", getpid());
+
+  // 2. Invokes pcbcopylog to set the flag to active
+  syscall(SYS_pcbcopylog, 1);
+
+  // 3. Invokes fork, spawning a child A and waits for it to terminate
+  int pid_A = fork();
+
+  // if child A
+  if (pid_A == 0) {
+    // 4. Has child A print its own PID
+    printf("PID of Child A: %d\n", getpid());
+
+    // 5. Has child A invoke fork, spawning a child B and waits for it to terminate
+    int pid_B = fork();
+
+    // if child B
+    if (pid_B == 0) {
+      // 6. Has child B print its own PID
+      printf("PID of Child B: %d\n", getpid());
+
+      // 7. Has child B invoke fork, spawning a child C and waits for it to terminate
+      int pid_C = fork();
+
+      // if child C
+      if (pid_C == 0) {
+        // 8. Has child C print its own PID
+        printf("PID of Child C: %d\n", getpid());
+
+        // 9. Has child C invoke pcbcopylog to set the flag to inactive
+        syscall(SYS_pcbcopylog, 0);    // 0 = inactive
+
+        // 10. Has child C invoke fork, spawning a child D and waits for it to terminate
+        int pid_D = fork();
+
+        // if child D
+        if (pid_D == 0) {
+
+          // 11. Has child D print its own PID
+          printf("PID of Child D: %d\n", getpid());
+
+          // 12. Has child D invoke fork, spawning a child E and waits for it to terminate
+          int pid_E = fork();
+
+          // if child E
+          if (pid_E == 0) {
+
+            // 13. Has child E print its own PID
+            printf("PID of Child E: %d\n", getpid());
+            exit(0);
+          }
+          wait(NULL);
+          exit(0);
+        }
+        wait(NULL);
+        exit(0);
+      }
+      wait(NULL);
+      exit(0);
+    }
+    wait(NULL);
+    exit(0);
+  }
+
+  wait(NULL);
+  exit(0);
+}
